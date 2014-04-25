@@ -7,21 +7,22 @@
 	<h1>Getting started with WebSocket API</h1>
 
 	<div id="output"></div>
-	<button id="sendMessage">Send again</button>
+	<input id="message" type="text" />
+	<button id="sendMessage">Send</button>
 	<button id="closeConnection">Close WebSocket Connection</button>
 
 	<script>
-		var output, ws, sendButton, closeButton;
+		var output, ws, sendButton, closeButton, messageInput;
 
 		function init() {
 			output = document.getElementById("output");
 			sendButton = document.getElementById("sendMessage");
 			closeButton = document.getElementById("closeConnection");
+			messageInput = document.getElementById("message");
 			ws = new WebSocket("ws://echo.websocket.org/echo");
 
 			ws.onopen = function(e) {
 				log("Connected");
-				sendMessage("Hello WebSocket!");
 			}
 
 			ws.onclose = function(e) {
@@ -33,7 +34,7 @@
 			}
 
 			sendButton.onclick = function(e) {
-				sendMessage("Hello again WebSocket!");
+				sendMessage(messageInput.value);
 			}
 
 			closeButton.onclick = function(e) {
@@ -46,7 +47,7 @@
 				return log("The connection isn't open");	
 			}
 
-			ws.send(msg);
+			ws.send(msg || "default message");
 			log("Message sent");
 		}
 
