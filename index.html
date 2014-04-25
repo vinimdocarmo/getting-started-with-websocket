@@ -12,10 +12,16 @@
 	<button id="closeConnection">Close WebSocket Connection</button>
 
 	<script>
-		var output, ws, sendButton, closeButton, messageInput;
+		var ws, sendButton, closeButton, messageInput;
+		var output = document.getElementById("output");
+
+		if(!!window.WebSocket) {
+			init();
+		} else {
+			log("This web browser does not support WebSocket API!")
+		}
 
 		function init() {
-			output = document.getElementById("output");
 			sendButton = document.getElementById("sendMessage");
 			closeButton = document.getElementById("closeConnection");
 			messageInput = document.getElementById("message");
@@ -51,7 +57,7 @@
 			log("Message sent");
 		}
 
-		function log(s, type) {
+		function log(s) {
 			var p = document.createElement("p");
 			p.style.wordWrap = "break-word";
 
@@ -60,8 +66,6 @@
 			
 			console.log(s);
 		}
-
-		init();
 	</script>
 </body>
 </html>
