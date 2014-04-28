@@ -2,18 +2,37 @@
 <html>
 <head>
 	<title>WebSocket</title>
+	<style type="text/css">
+    #simpleExample, #dropArea {
+      width: 50%; 
+      border: 1px solid;
+    }
+    #dropArea {
+    	margin-top: 20px;
+    }
+    #dropArea > #title {
+    	color: red;
+    }
+	</style>
 </head>
 <body>
 	<h1>Getting started with WebSocket API</h1>
 
-	<div id="output"></div>
-	<input id="message" type="text" />
-	<button id="sendMessage">Send</button>
-	<button id="closeConnection">Close WebSocket Connection</button>
+  <div id="simpleExample">
+    <div id="output"></div>
+		<input id="message" type="text" />
+		<button id="sendMessage">Send</button>
+		<button id="closeConnection">Close WebSocket Connection</button>
+  </div>
+
+	<div id="dropArea">
+    <p id="title">Drop an image here!</p>
+	</div>
 
 	<script>
-		var ws, sendButton, closeButton, messageInput;
-		var output = document.getElementById("output");
+		var echoWs, fileWs, sendButton, closeButton, messageInput;
+		var output = document.getElementById("output"),
+		    dropArea = document.getElementById("dropArea");
 
 		if(!!window.WebSocket) {
 			init();
@@ -25,18 +44,42 @@
 			sendButton = document.getElementById("sendMessage");
 			closeButton = document.getElementById("closeConnection");
 			messageInput = document.getElementById("message");
-			ws = new WebSocket("ws://echo.websocket.org/echo");
+			echoWs = new WebSocket("ws://echo.websocket.org/echo");
+			fileWs = new WebSocket("ws://echo.websocket.org/echo");
 
-			ws.onopen = function(e) {
-				log("Connected");
+			echoWs.onopen = function(e) {
+				log("Echo Web Socket Connected", output);
 			}
 
-			ws.onclose = function(e) {
-				log("Disconnected: " + (e.reason || "no reason"));
+			echoWs.onclose = function(e) {
+				log("Echo Web Socket Disconnected: " + (e.reason || "no reason"), output);
 			}
 
-			ws.onmessage = function(e) {
-				log("Message received: " + e.data);
+			echoWs.onmessage = function(e) {
+				log("Echo Web Socket Message received: " + e.data, output);
+			}
+
+			fileWs.onopen = function(e) {
+				log("File Web Socket Connected", dropArea);
+			}
+
+			fileWs.onclose = function(e) {
+				log("File Web Socket Disconnected: " + (e.reason || "no reason"), dropArea);
+			}
+
+			fileWs.onmessage = function(e) {
+				var blob = e.data;
+
+				log("File Web Socket Message received: " + blob.size + " bytes", dropArea);
+
+				if(window.webkitURL) {
+					URL = webkitURL;
+				}
+
+				var uri = URL.createObjectURL(blob);
+				var img = document.createElement("img");
+				img.src = uri;
+				dropArea.appendChild(img);
 			}
 
 			sendButton.onclick = function(e) {
@@ -44,27 +87,58 @@
 			}
 
 			closeButton.onclick = function(e) {
-				ws.close(1000, "Closed normally");
+				echoWs.close(1000, "Closed normally");
+			}
+
+			dropArea.ondragover = function(e) {
+				e.preventDefault();
+				dropArea.style.backgroundColor = "#6fff41";
+			}
+
+			dropArea.ondragleave = function(e) {
+				dropArea.style.backgroundColor = "#fff";
+			}
+
+			dropArea.ondrop = function(e) {
+				dropArea.style.backgroundColor = "#fff";
+				try {
+          e.preventDefault();
+          handleFileDrop(e.dataTransfer.files[0]);
+          return false;
+				} catch(err) {
+					log("There is an error. Look at the console!");
+					console.log(err);
+				}
 			}
 		}
 
 		function sendMessage(msg) {
-			if(ws.readyState !== WebSocket.OPEN) {
-				return log("The connection isn't open");	
+			if(echoWs.readyState !== WebSocket.OPEN) {
+				return log("The connection isn't open", output);	
 			}
 
-			ws.send(msg || "default message");
-			log("Message sent");
+			echoWs.send(msg || "default message");
+			log("Message sent", output);
 		}
 
-		function log(s) {
+		function log(s, el) {
 			var p = document.createElement("p");
 			p.style.wordWrap = "break-word";
 
 			p.textContent = s;
-			output.appendChild(p);
+			el.appendChild(p);
 			
 			console.log(s);
+		}
+
+		function handleFileDrop(file) {
+			var reader = new FileReader();
+
+			reader.readAsArrayBuffer(file);
+			reader.onload = function() {
+				log("sending :" + file.name, dropArea);
+				fileWs.send(reader.result);
+			}
 		}
 	</script>
 </body>
