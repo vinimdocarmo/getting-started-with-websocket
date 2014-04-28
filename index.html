@@ -44,8 +44,8 @@
 			sendButton = document.getElementById("sendMessage");
 			closeButton = document.getElementById("closeConnection");
 			messageInput = document.getElementById("message");
-			echoWs = new WebSocket("ws://echo.websocket.org/echo");
-			fileWs = new WebSocket("ws://echo.websocket.org/echo");
+			echoWs = new WebSocket("ws:localhost:9999");
+			fileWs = new WebSocket("ws:localhost:9999");
 
 			echoWs.onopen = function(e) {
 				log("Echo Web Socket Connected", output);
