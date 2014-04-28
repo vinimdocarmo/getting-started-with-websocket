@@ -20,13 +20,13 @@
 
   <div id="simpleExample">
     <div id="output"></div>
-		<input id="message" type="text" />
-		<button id="sendMessage">Send</button>
-		<button id="closeConnection">Close WebSocket Connection</button>
+	<input id="message" type="text" />
+	<button id="sendMessage">Send</button>
+	<button id="closeConnection">Close WebSocket Connection</button>
   </div>
 
 	<div id="dropArea">
-    <p id="title">Drop an image here!</p>
+    	<p id="title">Drop an image here!</p>
 	</div>
 
 	<script>
@@ -102,9 +102,9 @@
 			dropArea.ondrop = function(e) {
 				dropArea.style.backgroundColor = "#fff";
 				try {
-          e.preventDefault();
-          handleFileDrop(e.dataTransfer.files[0]);
-          return false;
+					e.preventDefault();
+					handleFileDrop(e.dataTransfer.files[0]);
+					return false;
 				} catch(err) {
 					log("There is an error. Look at the console!");
 					console.log(err);
@@ -132,6 +132,12 @@
 		}
 
 		function handleFileDrop(file) {
+			if((file.size / 1024) > 65) {
+				return fileWs.close(1000, "The image must be less than 65KB");
+			} else if(fileWs.readyState !== WebSocket.OPEN) {
+				return log("The connection isn't open", dropArea);
+			}
+
 			var reader = new FileReader();
 
 			reader.readAsArrayBuffer(file);
