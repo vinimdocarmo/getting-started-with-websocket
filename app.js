@@ -3,6 +3,8 @@ var server = require('http').createServer(handler),
 
 server.listen(3000);
 
+console.log('Running at localhost:' + server.address().port);
+
 function handler(req, res) {
 	fs.readFile(__dirname + '/index.html', function(err, data) {
 		if(err) {
